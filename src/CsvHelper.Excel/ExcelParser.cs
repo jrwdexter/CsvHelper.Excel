@@ -83,7 +83,7 @@ namespace CsvHelper.Excel
         /// <param name="culture">The culture.</param>
         /// <param name="leaveOpen"><c>true</c> to leave the <see cref="TextWriter"/> open after the <see cref="ExcelParser"/> object is disposed, otherwise <c>false</c>.</param>
         public ExcelParser(Stream stream, string sheetName, CultureInfo culture, bool leaveOpen = false) : this(stream,
-            sheetName, new CsvConfiguration(culture) {LeaveOpen = leaveOpen})
+            sheetName, new CsvConfiguration(culture, leaveOpen: leaveOpen))
         {
         }
 
@@ -204,7 +204,10 @@ namespace CsvHelper.Excel
         {
             var currentRow = _worksheet.Row(Row);
             var cells = currentRow.Cells(1, Count);
-            var values = cells.Select(x => x.Value.ToString()).ToArray();
+            var values = Configuration.TrimOptions.HasFlag(TrimOptions.Trim)
+                ? cells.Select(x => x.Value.ToString()?.Trim()).ToArray()
+                : cells.Select(x => x.Value.ToString()).ToArray();
+
             return values;
         }
     }
